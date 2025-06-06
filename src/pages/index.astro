@@ -30,9 +30,11 @@ import Layout from '../layouts/Layout.astro';
 							}
 							
 							this.isError = false;
+							localStorage.setItem('userEmail', this.email);
 							const [username, domain] = this.email.split('@');
 							const tag = Math.random().toString(36).substring(2, 8);
 							this.taggedEmail = `${username}+${tag}@${domain}`;
+							
 						},
 						
 						async copyToClipboard() {
