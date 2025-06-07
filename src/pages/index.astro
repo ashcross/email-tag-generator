@@ -23,6 +23,13 @@ import Layout from '../layouts/Layout.astro';
 						isError: false,
 						errorMessage: '',
 						
+						checkLocalStorage() {
+						this.email = localStorage.getItem('userEmail') || '';
+						this.emailList = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+						this.taggedEmail = this.emailList[0] || '';
+						
+						},
+						
 						generateTag() {
 							if (!this.email.includes('@')) {
 								this.isError = true;
@@ -42,6 +49,13 @@ import Layout from '../layouts/Layout.astro';
 							localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
 							
 						},
+
+						clearAll() {
+							localStorage.clear();
+							this.email = '';
+							this.taggedEmail = '';
+							this.emailList = [];
+						},
 						
 						async copyToClipboard() {
 							try {
@@ -53,7 +67,9 @@ import Layout from '../layouts/Layout.astro';
 								this.errorMessage = 'Failed to copy. Please try manually selecting the email.';
 							}
 						}
-					}">
+					}"
+					x-init="checkLocalStorage()"
+					>
 						<!-- Email Input -->
 						<div class="form-control">
 							<label class="label">
@@ -102,6 +118,13 @@ import Layout from '../layouts/Layout.astro';
 								<p class="font-mono" x-text="emailList.reverse().join(', ')"></p>
 							</div>
 							
+							<button 
+								class="btn btn-ghost w-full mt-4" 
+								@click="clearAll()"
+							>
+								Clear all emails
+							</button>
+
 							<button 
 								class="btn btn-secondary w-full mt-4" 
 								@click="copyToClipboard()"
