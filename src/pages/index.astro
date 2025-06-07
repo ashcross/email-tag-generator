@@ -18,6 +18,7 @@ import Layout from '../layouts/Layout.astro';
 					<div class="mt-6" x-data="{
 						email: '',
 						taggedEmail: '',
+						emailList: [],
 						showCopySuccess: false,
 						isError: false,
 						errorMessage: '',
@@ -33,7 +34,12 @@ import Layout from '../layouts/Layout.astro';
 							localStorage.setItem('userEmail', this.email);
 							const [username, domain] = this.email.split('@');
 							const tag = Math.random().toString(36).substring(2, 8);
-							this.taggedEmail = `${username}+${tag}@${domain}`;
+							const taggedEmail = `${username}+${tag}@${domain}`;
+							this.taggedEmail = taggedEmail;
+							const storedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+							this.emailList = storedEmails;
+							storedEmails.push(taggedEmail);
+							localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
 							
 						},
 						
@@ -89,6 +95,11 @@ import Layout from '../layouts/Layout.astro';
 							<div class="divider">Generated Email</div>
 							<div class="bg-base-200 p-4 rounded-lg break-all">
 								<p class="font-mono" x-text="taggedEmail"></p>
+							</div>
+
+							<div class="divider">Recent Tagged Emails</div>
+							<div class="bg-base-200 p-4 rounded-lg break-all">
+								<p class="font-mono" x-text="emailList.reverse().join(', ')"></p>
 							</div>
 							
 							<button 

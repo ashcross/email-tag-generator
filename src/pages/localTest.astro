@@ -13,6 +13,7 @@ import Layout from '../layouts/Layout.astro';
                 if (this.userEmail === null) { 
                     this.userEmail = 'No email is stored';
                 };
+                this.taggedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
                 
             }
         }"
@@ -20,7 +21,7 @@ import Layout from '../layouts/Layout.astro';
             <h2 class="text-lg">User Email:</h2>
             <p x-text="userEmail"></p>
             <h2 class="text-lg">Tagged Emails:</h2>
-            
+            <p x-text="taggedEmails.join(', ')"></p>
             <button class="btn btn-primary mt-4" @click="localStorage.clear(); getLocalStorage()">Clear all local storage</button>
         </div>
     </main>
