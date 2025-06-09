@@ -7,228 +7,238 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout Title="Create a Tagged Email">
   <main
-    class="bg-base-200 py-8 px-4 grid grid-cols-1 lg:grid-cols-2 gap-4 container mx-auto"
+    class="py-8 px-4 grid grid-cols-1 lg:grid-cols-2 gap-4 container mx-auto"
   >
-    <div class="col-span-2 lg:col-span-2">
-      <div class="card bg-base-100 shadox-xl p-8">
+    <!-- Title section -->
+    <div class="col-span-2">
+      <div class="card p-8">
         <daiv class="card-body">
           <h1 class="text-center font-bold text-4xl">Email Tag Generator</h1>
-          <p class="text-center text-2xl">
-            Generate unique email tags using the + symbol for testing and
-            filtering purposes.
+          <p class="text-center text-2xl max-w-[60ch] mx-auto font-light">
+            Unique email addresses that still appear in your inbox can be
+            created by utilising tags, the '+' symbol, in your email address.
+            Add your email address below and an optional identifier to get
+            started, then click 'generate tagged email'
           </p>
+          <p class="italic text-center text-sm max-w-[60ch] mx-auto mt-8">
+            This webpage <strong>does not</strong> store any of your used email addresses,
+            all data found on this screen stored in your browser's local storage
+            which can be cleared using the tools below.
+          </p>
+          <button class="btn btn-ghost mt-4 mx-auto"
+            >Why use a tagged email?</button
+          >
         </daiv>
       </div>
     </div>
 
-    <div class="col-span-1 mx-auto my-auto">
-      <div class="card bg-base-100 shadow-xl p-8">
-        <div class="card-body">
-          <h1 class="card-title text-2xl font-bold text-left justify-start">
-            Email Tag Generator
-          </h1>
-          <p class="text-left text-base-content/80 mt-2">
-            Generate unique email tags using the + symbol for testing and
-            filtering purposes.
-          </p>
+    <div
+      x-data="{
+		email: '',
+		taggedEmail: '',
+		emailList: [],
+		showCopySuccess: false,
+		isError: false,
+		errorMessage: '',
+		
+		checkLocalStorage() {
+		this.email = localStorage.getItem('userEmail') || '';
+		this.emailList = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+		this.taggedEmail = this.emailList[0] || '';
+		
+		},
+		
+		generateTag() {
+			if (!this.email.includes('@')) {
+				this.isError = true;
+				this.errorMessage = 'Please enter a valid email address';
+				return;
+			}
+			
+			this.isError = false;
+			localStorage.setItem('userEmail', this.email);
+			const [username, domain] = this.email.split('@');
+			const tag = Math.random().toString(36).substring(2, 8);
+			const taggedEmail = `${username}+${tag}@${domain}`;
+			this.taggedEmail = taggedEmail;
+			const storedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+			this.emailList = storedEmails;
+			storedEmails.push(taggedEmail);
+			localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
+			
+		},
 
-          <div
-            class="mt-6"
-            x-data="{
-						email: '',
-						taggedEmail: '',
-						emailList: [],
-						showCopySuccess: false,
-						isError: false,
-						errorMessage: '',
-						
-						checkLocalStorage() {
-						this.email = localStorage.getItem('userEmail') || '';
-						this.emailList = JSON.parse(localStorage.getItem('taggedEmails')) || [];
-						this.taggedEmail = this.emailList[0] || '';
-						
-						},
-						
-						generateTag() {
-							if (!this.email.includes('@')) {
-								this.isError = true;
-								this.errorMessage = 'Please enter a valid email address';
-								return;
-							}
-							
-							this.isError = false;
-							localStorage.setItem('userEmail', this.email);
-							const [username, domain] = this.email.split('@');
-							const tag = Math.random().toString(36).substring(2, 8);
-							const taggedEmail = `${username}+${tag}@${domain}`;
-							this.taggedEmail = taggedEmail;
-							const storedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
-							this.emailList = storedEmails;
-							storedEmails.push(taggedEmail);
-							localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
-							
-						},
+		clearAll() {
+			localStorage.clear();
+			this.email = '';
+			this.taggedEmail = '';
+			this.emailList = [];
+		},
+		
+		async copyToClipboard() {
+			try {
+				await navigator.clipboard.writeText(this.taggedEmail);
+				this.showCopySuccess = true;
+				setTimeout(() => this.showCopySuccess = false, 2000);
+			} catch (err) {
+				this.isError = true;
+				this.errorMessage = 'Failed to copy. Please try manually selecting the email.';
+			}
+		}
+	}"
+      x-init="checkLocalStorage()"
+      class="col-span-2 grid grid-cols-2 gap-4"
+    >
+      <div class="col-span-1">
+        <div class="card bg-base-100 shadow-xl p-8">
+          <div class="card-body">
+            <h1 class="card-title text-2xl font-bold text-left justify-start">
+              Create a Tagged Email Address
+            </h1>
+            <p class="text-left text-base-content/80 mt-2">
+              Generate unique email tags using the + symbol for testing and
+              filtering purposes.
+            </p>
 
-						clearAll() {
-							localStorage.clear();
-							this.email = '';
-							this.taggedEmail = '';
-							this.emailList = [];
-						},
-						
-						async copyToClipboard() {
-							try {
-								await navigator.clipboard.writeText(this.taggedEmail);
-								this.showCopySuccess = true;
-								setTimeout(() => this.showCopySuccess = false, 2000);
-							} catch (err) {
-								this.isError = true;
-								this.errorMessage = 'Failed to copy. Please try manually selecting the email.';
-							}
-						}
-					}"
-            x-init="checkLocalStorage()"
-          >
-            <!-- Email Input -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Your Email Address</span>
-              </label>
-              <input
-                type="email"
-                placeholder="example@domain.com"
-                class="input input-bordered w-full"
-                x-model="email"
-                @input="isError = false"
-              />
-            </div>
-
-            <!-- Error Message -->
-            <div
-              x-show="isError"
-              x-cloak
-              class="alert alert-error mt-4"
-              role="alert"
-            >
-              <span x-text="errorMessage"></span>
-            </div>
-
-            <!-- Generate Button -->
-            <button class="btn btn-primary w-full mt-4" @click="generateTag()">
-              Generate Tagged Email
-            </button>
-
-            <!-- Output Section -->
-            <div x-show="taggedEmail" x-cloak class="mt-6">
-              <div class="divider">Generated Email</div>
-              <div class="bg-base-200 p-4 rounded-lg break-all">
-                <p class="font-mono" x-text="taggedEmail"></p>
+            <div class="mt-6">
+              <!-- Email Input -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Your Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="example@domain.com"
+                  class="input input-bordered w-full"
+                  x-model="email"
+                  @input="isError = false"
+                />
+                <label class="label mt-8">
+                  <span class="label-text">Optional Additional Tag</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="optionalTag"
+                  class="input input-bordered w-full"
+                  x-model="tag"
+                  @input="isError = false"
+                />
               </div>
 
-              <div class="divider">Recent Tagged Emails</div>
-              <div class="bg-base-200 p-4 rounded-lg break-all">
-                <p class="font-mono" x-text="emailList.reverse().join(', ')">
-                </p>
-              </div>
-
-              <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
-                Clear all emails
-              </button>
-
-              <button
-                class="btn btn-secondary w-full mt-4"
-                @click="copyToClipboard()"
-              >
-                Copy to Clipboard
-              </button>
-
-              <!-- Copy Success Message -->
+              <!-- Error Message -->
               <div
-                x-show="showCopySuccess"
+                x-show="isError"
                 x-cloak
-                class="alert alert-success mt-4"
+                class="alert alert-error mt-4"
                 role="alert"
               >
-                <span>Email copied to clipboard!</span>
+                <span x-text="errorMessage"></span>
+              </div>
+
+              <!-- Generate Button -->
+              <button
+                class="btn btn-primary w-full mt-4"
+                @click="generateTag()"
+              >
+                Generate Tagged Email
+              </button>
+
+              <!-- Output Section -->
+              <div x-show="taggedEmail" x-cloak class="mt-6">
+                <div class="divider">Generated Email</div>
+                <div class="bg-base-200 p-4 rounded-lg break-all">
+                  <p class="font-mono" x-text="taggedEmail"></p>
+                </div>
+
+                <div class="divider">Recent Tagged Emails</div>
+                <div class="bg-base-200 p-4 rounded-lg break-all">
+                  <p class="font-mono" x-text="emailList.reverse().join(', ')">
+                  </p>
+                </div>
+
+                <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
+                  Clear all emails
+                </button>
+
+                <button
+                  class="btn btn-secondary w-full mt-4"
+                  @click="copyToClipboard()"
+                >
+                  Copy to Clipboard
+                </button>
+
+                <!-- Copy Success Message -->
+                <div
+                  x-show="showCopySuccess"
+                  x-cloak
+                  class="alert alert-success mt-4"
+                  role="alert"
+                >
+                  <span>Email copied to clipboard!</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="divider mt-8"></div>
-
-          <footer class="text-sm text-base-content/70">
-            <p>
-              Email tags (using the + symbol) allow you to create unlimited
-              variations of your email address. Most email providers will
-              deliver messages sent to tagged addresses to your main inbox,
-              making it perfect for testing and filtering purposes.
-            </p>
-          </footer>
+      <div class="col-span-1">
+        <div class="card bg-base-100 shadow-xl p-8 h-full">
+          <div class="card-body gap-4">
+            <h3 class="flex items-center justify-between card-title">
+              <span class="flex items-center gap-2 font-semibold"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-5 opacity-40"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+                  ></path></svg
+                >Your Recently Created Tagged Emails</span
+              >
+            </h3>
+            <div class="flex flex-col text-xs">
+				<template x-for="email in emailList"
+              <div
+                class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
+				x-text="email"
+              >
+                <span class="badge badge-xs badge-info"
+                  >Send</span
+                >
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div
-      class="card bg-base-100 card-border border-base-300 card-sm col-span-1 p-8"
-    >
-      <div class="card-body gap-4">
-        <h2 class="flex items-center justify-between">
-          <span class="flex items-center gap-2 font-semibold"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="size-5 opacity-40"
-              ><path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
-              ></path></svg
-            > Recent orders</span
-          >
-        </h2>
-        <div class="flex flex-col text-xs">
-          <div
-            class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-          >
-            Charlie Chapman <span class="badge badge-xs badge-info">Send</span>
-          </div>
-          <div
-            class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-          >
-            Howard Hudson <span class="badge badge-xs badge-error">Failed</span>
-          </div>
-          <div
-            class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-          >
-            Fiona Fisher <span class="badge badge-xs badge-warning"
-              >In progress</span
-            >
-          </div>
-          <div
-            class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-          >
-            Nick Nelson <span class="badge badge-xs badge-success"
-              >Completed</span
-            >
-          </div>
-          <div
-            class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-          >
-            Amanda Anderson <span class="badge badge-xs badge-success"
-              >Completed</span
-            >
-          </div>
+    <!-- Content section -->
+    <div class="col-span-2">
+      <div class="card p-8">
+        <div class="card-body max-w-3xl mx-auto my-8 p-16">
+          <h2 class="text-left font-bold text-4xl">
+            Why use a tagged email?
+          </h2>
+          <p class="text-left text-lg mx-auto font-light">
+            Email tags (using the + symbol) allow you to create unlimited
+            variations of your email address. Most email providers will deliver
+            messages sent to tagged addresses to your main inbox, making it
+            perfect for testing and filtering purposes.
+          </p>
         </div>
       </div>
     </div>
   </main>
-</Layout>
 
-<style>
-  [x-cloak] {
-    display: none !important;
-  }
-</style>
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+  </style>
+</Layout>
