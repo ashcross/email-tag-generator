@@ -13,14 +13,14 @@ import Layout from "../layouts/Layout.astro";
     <div class="col-span-2">
       <div class="card p-8">
         <daiv class="card-body">
-          <h1 class="text-center font-bold text-4xl">Email Tag Generator</h1>
-          <p class="text-center text-2xl max-w-[60ch] mx-auto font-light">
+          <h1 class="text-center font-bold text-6xl mb-2">Email Tag Generator</h1>
+          <p class="text-center text-2xl max-w-[60ch] mx-auto font-light text-base-content/70">
             Unique email addresses that still appear in your inbox can be
             created by utilising tags, the '+' symbol, in your email address.
             Add your email address below and an optional identifier to get
             started, then click 'generate tagged email'
           </p>
-          <p class="italic text-center text-sm max-w-[60ch] mx-auto mt-8">
+          <p class="italic text-center text-sm max-w-[60ch] mx-auto mt-8 text-base-content/70">
             This webpage <strong>does not</strong> store any of your used email addresses,
             all data found on this screen stored in your browser's local storage
             which can be cleared using the tools below.
@@ -32,9 +32,11 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </div>
 
+    <!-- Email Generator Section -->
     <div
       x-data="{
 		email: '',
+    identifier: '',
 		taggedEmail: '',
 		emailList: [],
 		showCopySuccess: false,
@@ -43,6 +45,7 @@ import Layout from "../layouts/Layout.astro";
 		
 		checkLocalStorage() {
 		this.email = localStorage.getItem('userEmail') || '';
+    this.identifier = localStorage.getItem('userIdentifier') || '';
 		this.emailList = JSON.parse(localStorage.getItem('taggedEmails')) || [];
 		this.taggedEmail = this.emailList[0] || '';
 		
@@ -57,13 +60,15 @@ import Layout from "../layouts/Layout.astro";
 			
 			this.isError = false;
 			localStorage.setItem('userEmail', this.email);
+      localStorage.setItem('userIdentifier', this.identifier);
+      const useridentifier = this.identifier ? `+${this.identifier}` : '';
 			const [username, domain] = this.email.split('@');
 			const tag = Math.random().toString(36).substring(2, 8);
-			const taggedEmail = `${username}+${tag}@${domain}`;
+			const taggedEmail = `${username}${useridentifier}+${tag}@${domain}`;
 			this.taggedEmail = taggedEmail;
 			const storedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
 			this.emailList = storedEmails;
-			storedEmails.push(taggedEmail);
+			storedEmails.unshift(taggedEmail);
 			localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
 			
 		},
@@ -71,6 +76,7 @@ import Layout from "../layouts/Layout.astro";
 		clearAll() {
 			localStorage.clear();
 			this.email = '';
+      this.identifier = '';
 			this.taggedEmail = '';
 			this.emailList = [];
 		},
@@ -99,6 +105,9 @@ import Layout from "../layouts/Layout.astro";
               Generate unique email tags using the + symbol for testing and
               filtering purposes.
             </p>
+            <p class="text-left text-base-content/80 mt-2">
+              <em>Example: sally+optionalTag+123abc@example.com</em>
+            </p>
 
             <div class="mt-6">
               <!-- Email Input -->
@@ -118,9 +127,9 @@ import Layout from "../layouts/Layout.astro";
                 </label>
                 <input
                   type="text"
-                  placeholder="optionalTag"
+                  placeholder="Optional identifier tag"
                   class="input input-bordered w-full"
-                  x-model="tag"
+                  x-model="identifier"
                   @input="isError = false"
                 />
               </div>
@@ -144,28 +153,11 @@ import Layout from "../layouts/Layout.astro";
               </button>
 
               <!-- Output Section -->
-              <div x-show="taggedEmail" x-cloak class="mt-6">
-                <div class="divider">Generated Email</div>
+              <div x-show="taggedEmail" x-cloak x-transition class="mt-6">
+                <div class="divider">Latest Generated Email Tag</div>
                 <div class="bg-base-200 p-4 rounded-lg break-all">
-                  <p class="font-mono" x-text="taggedEmail"></p>
+                  <p class="font-mono text-center text-lg hover:text-base-content/70 cursor-copy" x-text="taggedEmail" @click="copyToClipboard()"></p>
                 </div>
-
-                <div class="divider">Recent Tagged Emails</div>
-                <div class="bg-base-200 p-4 rounded-lg break-all">
-                  <p class="font-mono" x-text="emailList.reverse().join(', ')">
-                  </p>
-                </div>
-
-                <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
-                  Clear all emails
-                </button>
-
-                <button
-                  class="btn btn-secondary w-full mt-4"
-                  @click="copyToClipboard()"
-                >
-                  Copy to Clipboard
-                </button>
 
                 <!-- Copy Success Message -->
                 <div
@@ -202,15 +194,23 @@ import Layout from "../layouts/Layout.astro";
                 >Your Recently Created Tagged Emails</span
               >
             </h3>
-            <div class="flex flex-col text-xs">
-				<template x-for="email in emailList"
-              <div
-                class="border-t-base-content/5 flex items-center justify-between gap-2 border-t border-dashed py-2"
-				x-text="email"
-              >
-                <span class="badge badge-xs badge-info"
-                  >Send</span
-                >
+            <div class="flex flex-col">
+              <ul>
+                <template x-for="email in emailList" x-transition>
+                  <li class="flex justify-between mb-1">
+                    <p x-text="email"></p>
+                    <span class="badge badge-xs badge-error">Remove</span>
+                  </li>
+                </template>
+              </ul>
+
+              <div x-show="emailList.length < 1">
+                <span class="text-base-content/70 text-sm">No emails found</span>
+              </div>
+              <div x-show="emailList.length > 0">
+                <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
+                  Clear all emails
+                </button>
               </div>
             </div>
           </div>
@@ -222,9 +222,7 @@ import Layout from "../layouts/Layout.astro";
     <div class="col-span-2">
       <div class="card p-8">
         <div class="card-body max-w-3xl mx-auto my-8 p-16">
-          <h2 class="text-left font-bold text-4xl">
-            Why use a tagged email?
-          </h2>
+          <h2 class="text-left font-bold text-4xl">Why use a tagged email?</h2>
           <p class="text-left text-lg mx-auto font-light">
             Email tags (using the + symbol) allow you to create unlimited
             variations of your email address. Most email providers will deliver
