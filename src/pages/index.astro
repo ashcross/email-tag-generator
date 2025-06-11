@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Content from "./markdown/whyUseTags.md";
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
@@ -7,7 +8,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout Title="Create a Tagged Email">
   <main
-    class="py-8 px-4 grid grid-cols-1 lg:grid-cols-2 gap-4 container mx-auto"
+    class="py-8 px-4 grid grid-cols-2 gap-4 container mx-auto"
   >
     <!-- Title section -->
     <div class="col-span-2">
@@ -25,9 +26,9 @@ import Layout from "../layouts/Layout.astro";
             all data found on this screen stored in your browser's local storage
             which can be cleared using the tools below.
           </p>
-          <button class="btn btn-ghost mt-4 mx-auto"
+          <a href="#why-use-tags" class="mx-auto"><button class="btn btn-ghost mt-4"
             >Why use a tagged email?</button
-          >
+          ></a>
         </daiv>
       </div>
     </div>
@@ -81,19 +82,28 @@ import Layout from "../layouts/Layout.astro";
 			this.emailList = [];
 		},
 		
-		async copyToClipboard() {
+		async copyToClipboard(emailToCopy = null) {
 			try {
-				await navigator.clipboard.writeText(this.taggedEmail);
+				const textToCopy = emailToCopy || this.taggedEmail;
+				await navigator.clipboard.writeText(textToCopy);
 				this.showCopySuccess = true;
 				setTimeout(() => this.showCopySuccess = false, 2000);
 			} catch (err) {
 				this.isError = true;
 				this.errorMessage = 'Failed to copy. Please try manually selecting the email.';
 			}
+		},
+
+		removeEmail(index) {
+			this.emailList.splice(index, 1);
+			localStorage.setItem('taggedEmails', JSON.stringify(this.emailList));
+			if (index === 0) {
+				this.taggedEmail = this.emailList[0] || '';
+			}
 		}
 	}"
       x-init="checkLocalStorage()"
-      class="col-span-2 grid grid-cols-2 gap-4"
+      class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
     >
       <div class="col-span-1">
         <div class="card bg-base-100 shadow-xl p-8">
@@ -196,10 +206,17 @@ import Layout from "../layouts/Layout.astro";
             </h3>
             <div class="flex flex-col">
               <ul>
-                <template x-for="email in emailList" x-transition>
-                  <li class="flex justify-between mb-1">
-                    <p x-text="email"></p>
-                    <span class="badge badge-xs badge-error">Remove</span>
+                <template x-for="(email, index) in emailList" :key="index">
+                  <li class="flex justify-between mb-1 items-center">
+                    <p 
+                      class="cursor-pointer hover:text-base-content/70 transition-colors" 
+                      x-text="email"
+                      @click="copyToClipboard(email)"
+                    ></p>
+                    <span 
+                      class="badge badge-xs badge-secondary cursor-pointer hover:badge-error/80" 
+                      @click="removeEmail(index)"
+                    >Remove</span>
                   </li>
                 </template>
               </ul>
@@ -219,18 +236,10 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <!-- Content section -->
-    <div class="col-span-2">
-      <div class="card p-8">
-        <div class="card-body max-w-3xl mx-auto my-8 p-16">
-          <h2 class="text-left font-bold text-4xl">Why use a tagged email?</h2>
-          <p class="text-left text-lg mx-auto font-light">
-            Email tags (using the + symbol) allow you to create unlimited
-            variations of your email address. Most email providers will deliver
-            messages sent to tagged addresses to your main inbox, making it
-            perfect for testing and filtering purposes.
-          </p>
+    <div id="why-use-tags" class="col-span-2">
+        <div class="max-w-[80ch] mx-auto my-8 p-16 prose prose-xl">
+          <Content />
         </div>
-      </div>
     </div>
   </main>
 
