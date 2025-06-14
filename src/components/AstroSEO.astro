@@ -1,0 +1,13 @@
+---
+import { SEO } from "astro-seo";
+
+const { Title, Description, NoIndex, NoFollow } = Astro.props;
+---
+
+<SEO 
+title={Title} 
+titleTemplate="%s | Email Tage Generator"
+description={Description}
+noindex={false || NoIndex}
+nofollow={false || NoFollow}
+/>
