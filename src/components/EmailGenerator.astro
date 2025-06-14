@@ -133,6 +133,7 @@ class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
         <button
           class="btn btn-primary w-full mt-4"
           @click="generateTag()"
+          data-simple-event="generate_tagged_email"
         >
           Generate Tagged Email
         </button>
@@ -141,7 +142,7 @@ class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
         <div x-show="taggedEmail" x-cloak x-transition class="mt-6">
           <div class="divider">Latest Generated Email Tag</div>
           <div class="bg-base-200 p-4 rounded-lg break-all">
-            <p class="font-mono text-center text-lg hover:text-base-content/70 cursor-copy" x-text="taggedEmail" @click="copyToClipboard()"></p>
+            <p class="font-mono text-center text-lg hover:text-base-content/70 cursor-copy" x-text="taggedEmail" @click="copyToClipboard()" data-simple-event="copy-main-tagged-email"></p>
           </div>
 
           <!-- Copy Success Message -->
@@ -181,10 +182,12 @@ class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
                 class="cursor-pointer hover:text-base-content/70 transition-colors" 
                 x-text="email"
                 @click="copyToClipboard(email)"
+                data-simple-event="copy-tagged-email"
               ></p>
               <span 
                 class="badge badge-xs badge-secondary cursor-pointer hover:badge-error/80" 
                 @click="removeEmail(index)"
+                data-simple-event="remove-tagged-email"
               >Remove</span>
             </li>
           </template>
@@ -194,10 +197,10 @@ class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
           <span class="text-base-content/70 text-sm">No emails found</span>
         </div>
         <div x-show="emailList.length > 0">
-          <button class="btn btn-primary w-full mt-4" @click="copyAllToClipboard()">
+          <button class="btn btn-primary w-full mt-4" @click="copyAllToClipboard()" data-simple-event="copy-all-tagged-emails">
             Copy All Emails
           </button>
-          <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
+          <button class="btn btn-ghost w-full mt-4" @click="clearAll()" data-simple-event="clear-all-tagged-emails">
             Clear all emails
           </button>
         </div>

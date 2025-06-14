@@ -10,6 +10,8 @@ const { Title, Description, NoIndex, NoFollow } = Astro.props;
 	<head>
 		<AstroSEO Title={Title} Description={Description} NoIndex={NoIndex} NoFollow={NoFollow} />
 		<SimpleAnalytics />
+		<script async src="https://scripts.simpleanalyticscdn.com/auto-events.js"></script>
+		<script async src="https://scripts.simpleanalyticscdn.com/inline-events.js"></script>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
