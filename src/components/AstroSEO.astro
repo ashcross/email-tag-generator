@@ -1,7 +1,15 @@
 ---
 import { SEO } from "astro-seo";
-
 const { Title, Description, NoIndex, NoFollow } = Astro.props;
+
+/* 
+NoIndex and NoFollow are boolean values that are passed in from the Layout component.
+If NoIndex is true, the page will be indexed by search engines.
+If NoFollow is true, the page will not be followed by search engines.
+
+If NoIndex and NoFollow are not passed in or are set to False, the page will be indexed by search engines and followed by search engines.
+
+*/
 ---
 
 <SEO 
