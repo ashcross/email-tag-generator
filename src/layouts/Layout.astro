@@ -7,7 +7,7 @@ const { Title } = Astro.props;
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{Title} | Email Tag Generator</title>
@@ -21,7 +21,10 @@ const { Title } = Astro.props;
 	html,
 	body {
 		margin: 0;
+		padding: 0;
 		width: 100%;
+		max-width: 100vw;
+		overflow-x: hidden;
 		/* min-height: 100%; */
 	}
 </style>
