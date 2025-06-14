@@ -1,0 +1,208 @@
+---
+import Alert from "../components/alert.astro";
+---
+<!-- Email Generator Section -->
+<div
+x-data="{
+  email: '',
+identifier: '',
+  taggedEmail: '',
+  emailList: [],
+  showCopySuccess: false,
+  isError: false,
+  errorMessage: '',
+  
+  checkLocalStorage() {
+  this.email = localStorage.getItem('userEmail') || '';
+this.identifier = localStorage.getItem('userIdentifier') || '';
+  this.emailList = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+  this.taggedEmail = this.emailList[0] || '';
+  
+  },
+  
+  generateTag() {
+      if (!this.email.includes('@')) {
+          this.isError = true;
+          this.errorMessage = 'Please enter a valid email address';
+          return;
+      }
+      
+      this.isError = false;
+      localStorage.setItem('userEmail', this.email);
+localStorage.setItem('userIdentifier', this.identifier);
+const useridentifier = this.identifier ? `+${this.identifier}` : '';
+      const [username, domain] = this.email.split('@');
+      const tag = Math.random().toString(36).substring(2, 8);
+      const taggedEmail = `${username}${useridentifier}+${tag}@${domain}`;
+      this.taggedEmail = taggedEmail;
+      const storedEmails = JSON.parse(localStorage.getItem('taggedEmails')) || [];
+      this.emailList = storedEmails;
+      storedEmails.unshift(taggedEmail);
+      localStorage.setItem('taggedEmails', JSON.stringify(storedEmails));
+      
+  },
+
+  clearAll() {
+      localStorage.clear();
+      this.email = '';
+this.identifier = '';
+      this.taggedEmail = '';
+      this.emailList = [];
+  },
+  
+  async copyToClipboard(emailToCopy = null) {
+      try {
+          const textToCopy = emailToCopy || this.taggedEmail;
+          await navigator.clipboard.writeText(textToCopy);
+          this.showCopySuccess = true;
+          setTimeout(() => this.showCopySuccess = false, 3000);
+      } catch (err) {
+          this.isError = true;
+          this.errorMessage = 'Failed to copy. Please try manually selecting the email.';
+      }
+  },
+
+async copyAllToClipboard() {
+const allEmails = this.emailList.join(', ');
+await navigator.clipboard.writeText(allEmails);
+this.showCopySuccess = true;
+setTimeout(() => this.showCopySuccess = false, 3000);
+},
+
+  removeEmail(index) {
+      this.emailList.splice(index, 1);
+      localStorage.setItem('taggedEmails', JSON.stringify(this.emailList));
+      if (index === 0) {
+          this.taggedEmail = this.emailList[0] || '';
+      }
+  }
+}"
+x-init="checkLocalStorage()"
+class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
+>
+<div class="col-span-1">
+  <div class="card bg-base-100 shadow-xl p-8">
+    <div class="card-body">
+      <h1 class="card-title text-2xl font-bold text-left justify-start">
+        Create a Tagged Email Address
+      </h1>
+      <p class="text-left text-base-content/80 mt-2">
+        Generate unique email tags using the + symbol for testing and
+        filtering purposes.
+      </p>
+      <p class="text-left text-base-content/80 mt-2">
+        <em>Example: sally+optionalTag+123abc@example.com</em>
+      </p>
+
+      <div class="mt-6">
+        <!-- Email Input -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Your Email Address</span>
+          </label>
+          <input
+            type="email"
+            placeholder="example@domain.com"
+            class="input input-bordered w-full"
+            x-model="email"
+            @input="isError = false"
+          />
+          <label class="label mt-8">
+            <span class="label-text">Optional Additional Tag</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Optional identifier tag"
+            class="input input-bordered w-full"
+            x-model="identifier"
+            @input="isError = false"
+          />
+        </div>
+
+        <!-- Error Message -->
+        <div
+          x-show="isError"
+          x-cloak
+          class="alert alert-error mt-4"
+          role="alert"
+        >
+          <span x-text="errorMessage"></span>
+        </div>
+
+        <!-- Generate Button -->
+        <button
+          class="btn btn-primary w-full mt-4"
+          @click="generateTag()"
+        >
+          Generate Tagged Email
+        </button>
+
+        <!-- Output Section -->
+        <div x-show="taggedEmail" x-cloak x-transition class="mt-6">
+          <div class="divider">Latest Generated Email Tag</div>
+          <div class="bg-base-200 p-4 rounded-lg break-all">
+            <p class="font-mono text-center text-lg hover:text-base-content/70 cursor-copy" x-text="taggedEmail" @click="copyToClipboard()"></p>
+          </div>
+
+          <!-- Copy Success Message -->
+          <!-- <CopySuccess /> -->
+          <Alert />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-span-1">
+  <div class="card bg-base-100 shadow-xl p-8 h-full">
+    <div class="card-body gap-4">
+      <h3 class="flex items-center justify-between card-title">
+        <span class="flex items-center gap-2 font-semibold"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-5 opacity-40"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+            ></path></svg
+          >Your Recently Created Tagged Emails</span
+        >
+      </h3>
+      <div class="flex flex-col">
+        <ul>
+          <template x-for="(email, index) in emailList" :key="index">
+            <li class="flex justify-between mb-1 items-center">
+              <p 
+                class="cursor-pointer hover:text-base-content/70 transition-colors" 
+                x-text="email"
+                @click="copyToClipboard(email)"
+              ></p>
+              <span 
+                class="badge badge-xs badge-secondary cursor-pointer hover:badge-error/80" 
+                @click="removeEmail(index)"
+              >Remove</span>
+            </li>
+          </template>
+        </ul>
+
+        <div x-show="emailList.length < 1">
+          <span class="text-base-content/70 text-sm">No emails found</span>
+        </div>
+        <div x-show="emailList.length > 0">
+          <button class="btn btn-primary w-full mt-4" @click="copyAllToClipboard()">
+            Copy All Emails
+          </button>
+          <button class="btn btn-ghost w-full mt-4" @click="clearAll()">
+            Clear all emails
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
